@@ -35,6 +35,10 @@ localize = (opts) ->
   # like to set into your request, like an api key, access token, id, etc..
   @bodyOverride = {}
 
+  # transformData is an array of functions you can pass which will be able to 
+  # manipulate the data before it is stored away and eventually served up
+  @transformData = []; 
+
 
   @methodOverride = null;
 
@@ -73,9 +77,6 @@ localize = (opts) ->
   # strictSSL to follow unsafe url requests from unsigned https
   @strictSSL = false
 
-  # preware array
-  @preware = []
-
   ### settings to store cache items ###
 
   # option to set cache, defaults to `true`
@@ -111,6 +112,12 @@ localize = (opts) ->
 
   # maintain our scope... es mui importante
   self = @
+
+  @preware = (req, res, next) ->
+
+    req.body = if self.bodyOverride? then _.extend {}, self.bodyOverride, req.body 
+
+    next()
   
   @request = (req, res, next) ->
 
@@ -141,27 +148,17 @@ localize = (opts) ->
     
       next JSON.stringify {error: "Restricted/Unsupported method, please try again."}, null
 
-  extendBody = (req, res, next) ->
-
-    req.body = if this.bodyOverride? then _.extend {}, this.bodyOverride, req.body 
-
-    next()
-
-  # add our first preware, you can add as well.
-  @preware.push extendBody
   # default router, this should send your json response back to you!!
   @router = (req, res) ->
     # set `req[self.customKey]` to our body
     res.send req[self.customKey]
-
+    
   @
-
 
 localize::mount = (app, fn) ->
   # mount our routes to express, this will allow for a sync
   # request, and fire only once.
   self = @
-
 
   # verify we have custom middleware, otherwise skip this loop 
   # all together

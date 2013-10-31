@@ -29,12 +29,14 @@ extended = (ds) ->
     # run this once, because it's okay.
     self.garbageCollection (err, removed) ->
       return if err? err
-      if removed > 0 then console.log "NeDB: sent #{removed} items to garbarge collection"
+      if removed > 0
+        console.log "NeDB: sent #{removed} items to garbarge collection"
 
     setInterval ->
       self.garbageCollection (err, removed) ->
         return if err? err
-        # if removed > 0 then console.log "NeDB: sent #{removed} items to garbarge collection"
+        if removed > 0
+          console.log "NeDB: sent #{removed} items to garbarge collection"
     , int # setting this to ten minute increments should do the trick.
 
   @
@@ -66,7 +68,7 @@ extended::Schema = (cache, ds) ->
   if @stale? or @stale != false
     setTimeout ->
       ds.garbageCollection (err, count) ->
-        return if err? then console.log err
+        return if err? then err else if count > 0 then console.log "removed #{count} items from cache"
     , self.stale
 
     @stale = Date.now() + parseInt self.stale

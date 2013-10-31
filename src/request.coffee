@@ -47,9 +47,11 @@ requestsHandler = (req, opts, fn) ->
           return if resp.statusCode > 305 then fn JSON.stringify(_.extend({}, body, {error: "Error occured, unhandled status code: #{resp.statusCode}"})), null
 
           if body?
-            
             # build our cache object
             cache = JSON.parse body
+
+            for func in opts.transformData
+              cache = func cache; 
 
             # extend with a customizable
             # stale object..
